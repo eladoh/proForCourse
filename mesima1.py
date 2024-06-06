@@ -31,7 +31,8 @@ def fromBineryToMinus(bineryList):
             carry = 0
     result.reverse()
     return result
-    
-print(fromNumTobinery(42))
 
-print(fromBineryToMinus(fromNumTobinery(42)))
+x = int(input("enter a number: "))
+
+print(fromNumTobinery(x))
+print(fromBineryToMinus(fromNumTobinery(x)))
