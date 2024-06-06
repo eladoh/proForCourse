@@ -9,6 +9,8 @@ def fromNumTobinery(x):
             returnList.append(0)
     return returnList
 
+#change
+
 
 # fdgrrdftgrt
 def fromBineryToMinus(bineryList):
