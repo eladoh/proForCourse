@@ -20,7 +20,7 @@ def fromBineryToMinus(bineryList):
         else:
             i = 0
             result.append(i)
-            
+    
     carry = 1;
     result.reverse()
     for i in range(len(result)):
