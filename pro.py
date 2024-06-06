@@ -9,6 +9,8 @@ def fromNumTobinery(x):
             returnList.append(0)
     return returnList
 
+
+# takes a number in binery and turns it to minus 
 def fromBineryToMinus(bineryList):
     result = []
     for i in bineryList:
