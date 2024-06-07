@@ -8,7 +8,7 @@ missingNumArr = []
 for i in range(1,101):
     missingNumArr.append(i)
 
-missingNumArr.pop(8)
+missingNumArr.pop(10)
 
 result = sumOf100 - sum(missingNumArr)
 
