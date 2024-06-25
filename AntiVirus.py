@@ -41,28 +41,7 @@ def type(words: str):
     print()
 
 def check_for_virus():
-
-    api_key = "f205ae5df052b585445febb5df5ea7c7c41bfd13bba3eaf348cf59718022327d"
-    url = r"https://www.virustotal.com/vtapi/v2/file/scan"
-    api = open("vt-api.txt", "r").read()
-    file_path = input( colorama.Fore.YELLOW + "enter the path of the file >> ")
-
-    params = {'api_key': api}
-
-    file_to_upload = {"file": open(file_path, " rb")}
     
-    response = requests. post(url,files = file_to_upload, params=params)
-
-    file_url = f"https://www.virustotal.com/api/v3/files/{(response.json())['sha1']}"
-
-    headers = {"accept": "application/json", "x-apikey": api}
-
-    type(colorama.Fore.YELLOW + "Analysing... ")
-    
-    response = requests.get(file_url,headers=headers)
-
-    print(response)
-
 print(check_for_virus())
 
 
