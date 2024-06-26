@@ -13,94 +13,112 @@ from time import sleep
 
 path  = os.path.normpath(r"C:/Users/user1/Desktop/corcu")
 
-def get_last_modified_dict(path:str) -> dict: #  turning the path from string to dict so the os.walk can run over it
+
+
+def get_last_modified_list(path:str) -> dict: #  turning the path from string to dict so the os.walk can run over it
     data = os.walk(path) #  אובייקט של גנרטור שכל פעם מחזיר טאפל שיש בו שלושה נתונים: הנתיב, התיקיה והקבצים שבאותו התקייה
-    return_data = dict() # empty dict
-    # for item in data:
-    #     print("item: " + str(item))
-    # for route, folder , files in data:
-    #     print("route " + str(route))
-    #     print("folder "+ str(folder))
-    #     print("files " + str(files))
-    
+    return_data = [] # empty list
+ 
     for route, folder , files in data: # רץ על הטאפל שקיבל מדאטה ולוקח את שלושת הנתונים בו ושם אותם במשתנים
         for file in files: # רץ על כל אחד מהקבצים
             file = os.path.join(route, file) # לוקח את הנתיב הנוחכי מוסיף לקצה שלו את הקובץ האחרון ושומר את זה במשתנה 
-            return_data[file] = "Modification time: " + str(os.stat(file).st_mtime) # מוסיף למילון את נתיב הקובץ ונותן לו נתונים של מתי הוא שונה 
-    return return_data 
+            return_data.append(str(file))
+            #return_data[file] = "Modification time: " + str(os.stat(file).st_mtime) # מוסיף למילון את נתיב הקובץ ונותן לו נתונים של מתי הוא שונה 
 
-#print(get_last_modified_dict(path))
+    formatted_result = [p.replace("\\", "/") for p in return_data]
+    return formatted_result 
 
-colorama.init()
-
-def type(words: str):
-    for char in words:
-        sleep(0.015)
-        sys.stdout.write(char)
-        sys.stdout.flush()
-    print()
+#print(get_last_modified_list(path))
 
 #https://virustotal.readme.io/v2.0/reference/file-scan
-def check_for_virus():
+def check_for_virus(file_path):
+    post_url = "https://www.virustotal.com/api/v3/files"
 
-    url = 'https://www.virustotal.com/vtapi/v2/file/scan'
+    files = { "file": ("file", open(file_path, "rb")) }
+    headers = {
+        "accept": "application/json",
+        "x-apikey": "f205ae5df052b585445febb5df5ea7c7c41bfd13bba3eaf348cf59718022327d"
+    }
 
-    params = {'apikey': 'https://www.virustotal.com/vtapi/v2/file/scan/upload_url'}
+    response = requests.post(post_url, files=files, headers=headers)
+    response_data = response.json()
 
-    files = {'file': ('myfile.exe', open('C:/Users/user1/Desktop/corcu/secret_message.jpg', 'rb'))}
+    response_id = response_data["data"]["id"]
 
-    response = requests.post(url, files=files, params=params)
+    print(response_id)
 
-    print(response.json())
+    get_url = f"https://www.virustotal.com/api/v3/analyses/{response_id}"
 
-    # url = "https://www.virustotal.com/vtapi/v2/file/scan/upload_url"
+    end_response = requests.get(get_url, headers=headers)
 
-    # params = {'apikey':'f205ae5df052b585445febb5df5ea7c7c41bfd13bba3eaf348cf59718022327d'}
+    end_responsejson = end_response.json()
 
-    # response = requests.get(url, params=params)
+    stats = end_responsejson["data"]["attributes"]["stats"]
+#    print(end_response.text)
+    print(stats)
 
-    # print(response.json())
-    # upload_url_json = response.json()
-    # upload_url = upload_url_json['upload_url']
+    stats_to_keep = list(stats.keys())[:2] # list of the stats i want to save
 
-    # file_to_scan= r"C:/Users/user1/Desktop/corcu/secret_message.jpg"
-    # files = {'file': (file_to_scan, open(file_to_scan, 'rb'))}
-    # response = requests.post(upload_url, files=files)
+    filtered_stats = {key: stats[key] for key in stats_to_keep} # creating a dict with only the stats i need
 
-    # print(response.text)
+    count_bad = 0
+    print(filtered_stats)
 
-
-
-
-check_for_virus()
-
+    for stat in filtered_stats:
+        count_bad += filtered_stats[stat]
+    if(filtered_stats[stat] > 0):
+        print(f"this file contain malicious content {count_bad}")
+    else:
+        print("this file has no viruses")
 
 
-def main(commend:str, watchdir:dir= path):
+
+
+#check_for_virus("C:/Users/user1/Desktop/corcu/New Text Document (4).txt")
+
+
+
+def main(name:str, run:bool, watchdir:dir= path):
+        
+
     print("PROGRAM IS LIVE")
-    print(f"program: {commend}")
+    print(f"program: {name}")
     first_run = True
-    
-    current_data = str(get_last_modified_dict(watchdir)) # takes current file data(filePath, modificaition time, )
-    while True:
-        new_data = get_last_modified_dict(watchdir) # getting new data
+
+    current_data = str(get_last_modified_list(watchdir)) # takes current file data(filePaths)
+    while run:
+        new_data = get_last_modified_list(watchdir) # getting new data
         if first_run:
             current_data = new_data
             first_run = False
         if new_data != current_data and not first_run : # אם המידע השתנה אז צריך להחליף את המידע הישן בחדש
-            added_file = set(new_data) - set(current_data) # בודק מה הקובץ החדש
+            added_file = list(set(new_data) - set(current_data)) # בודק מה הקובץ החדש
             current_data = new_data
-            print(f"File Changed/added {added_file}") 
-            check_for_virus(added_file)
-            
-
-
-
-
+            print(f"File Changed/added {added_file[0]}") 
+            check_for_virus(added_file[0])
         time.sleep(0.05) 
 
 #main("Anti Virus")
 
+window = Tk()
+window.minsize(400,400)
+
+search_text = Label(window, text = 'check a file')
+search_text.pack()
+
+entry = Entry()
+entry.config(font=('Ink Free', 10))
+entry.pack()
+
+def submit():
+    search = entry.get() # get the value of what you wrote
+    main("ANTI VIRUS", True)
+
+button = Button(window, text="search for viruses", width=25, command= submit)
+button.place(x=100, y=300)
+
+
+mainloop()
 
 
 
@@ -117,20 +135,3 @@ def main(commend:str, watchdir:dir= path):
 
 
 
-
-
-
-
-
-
-
-# route = Tk()
-
-# route.minsize(400,400)
-
-# m = Label(route, text="ANTI VIRUS")
-# m.pack()
-# button = Button(route, text="Folder To Start Checking from", width=25, command= route.destroy)
-# button.place(x=100, y=300)
-
-# m.mainloop()
