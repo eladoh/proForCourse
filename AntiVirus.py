@@ -15,6 +15,8 @@ from time import sleep
 path  = os.path.normpath(r"C:/Users/user1/Desktop/corcu")
 
 window = Tk()
+
+
 window.minsize(400,400)
 new_file = Label(window, text = '')
 monitor = Label(window, text = '')
@@ -23,19 +25,53 @@ search_text = Label(window, text = 'enter a path to monitor')
 search_text.pack()
 
 entry = Entry()
-entry.config(font=('Ink Free', 10))
 entry.pack()
 
-def submit():
-    global monitor
-    search = entry.get() # get the value of what you wrote
-    monitor = Label(window, text = 'monitoring the path...')
-    monitor.pack()
-    main("ANTI VIRUS", True, search)
+
+frequency = Label(window, text = 'enter frequency')
+frequency.pack()
+
+options = [1, 2, 3, 5, 10]  
+selected_value = StringVar(window)
+selected_value.set(options[0])  
+
+option_menu = OptionMenu(window, selected_value, *options)
+option_menu.pack()
+
+scan_in_progress = False
+
+def start_scan():
+    global monitor, scan_in_progress
+    
+    if(scan_in_progress):
+        print("scan is in progress")
+        scan_live = Label(window, text = 'scan is already in progress...')
+        scan_live.pack()
+        window.after(1000, lambda: scan_live.pack_forget())
+
+    else:
+        scan_in_progress = True
+
+        value = selected_value.get() 
+        search = entry.get() # get the value of what you wrote
+        monitor = Label(window, text = 'monitoring the path...')
+        monitor.pack()
+
+#        stop_button.place(x=100, y=270)
+        main("ANTI VIRUS", True, value, search)
 
 
-button = Button(window, text="start scan", width=25, command= submit)
+
+# def stop_scan():
+#     global scan_in_progress
+#     scan_in_progress = False
+    
+# buttons
+button = Button(window, text="start scan", width=25, command = start_scan)
 button.place(x=100, y=300)
+
+# stop_button = Button(window, text="stop scan", width=25, command = stop_scan)
+
 
 
 
@@ -109,13 +145,15 @@ def check_for_virus(file_path):
 
 #check_for_virus("C:/Users/user1/Desktop/corcu/New Text Document (4).txt")
 
-def main(name: str, run: bool, watchdir: str):
+def main(name: str, run: bool,frequency:int, watchdir: str): #frequency: str
     print("PROGRAM IS LIVE")
     print(f"Program: {name}")
+    
     first_run = True
     current_data = get_last_modified_list(watchdir)
 
     def check_files():
+        print("heoiwjmiko")
         nonlocal first_run, current_data
         new_data = get_last_modified_list(watchdir)
         if first_run:
@@ -127,9 +165,19 @@ def main(name: str, run: bool, watchdir: str):
             print(f"File Changed/added {added_file[0]}")
             check_for_virus(added_file[0])
         if run:
-            window.after(50, check_files)  # Schedule next check
-
+            window.after(int(frequency) * 1000 , check_files)  # Schedule next check # add frequency
     check_files()
+    
+    def stop_scan():
+        nonlocal run
+        global scan_in_progress
+        scan_in_progress = False
+        run = False
+        monitor.pack_forget()
+        stop_button.pack_forget()
+
+    stop_button = Button(window, text="Stop Scan", command=stop_scan)
+    stop_button.pack()
 
 #main("Anti Virus", True)
 
