@@ -153,7 +153,7 @@ def main(name: str, run: bool,frequency:int, watchdir: str): #frequency: str
     current_data = get_last_modified_list(watchdir)
 
     def check_files():
-        print("heoiwjmiko")
+        print("running...")
         nonlocal first_run, current_data
         new_data = get_last_modified_list(watchdir)
         if first_run:
