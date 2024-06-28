@@ -3,7 +3,8 @@ import os
 import sys
 import time
 import subprocess
-import pandas
+#import pandas
+#import numpy
 import requests
 from bs4 import BeautifulSoup
 import json
@@ -12,6 +13,29 @@ from time import sleep
 
 
 path  = os.path.normpath(r"C:/Users/user1/Desktop/corcu")
+
+window = Tk()
+window.minsize(400,400)
+new_file = Label(window, text = '')
+monitor = Label(window, text = '')
+
+search_text = Label(window, text = 'enter a path to monitor')
+search_text.pack()
+
+entry = Entry()
+entry.config(font=('Ink Free', 10))
+entry.pack()
+
+def submit():
+    global monitor
+    search = entry.get() # get the value of what you wrote
+    monitor = Label(window, text = 'monitoring the path...')
+    monitor.pack()
+    main("ANTI VIRUS", True, search)
+
+
+button = Button(window, text="start scan", width=25, command= submit)
+button.place(x=100, y=300)
 
 
 
@@ -32,6 +56,9 @@ def get_last_modified_list(path:str) -> dict: #  turning the path from string to
 
 #https://virustotal.readme.io/v2.0/reference/file-scan
 def check_for_virus(file_path):
+    global new_file
+    # new_file.pack_forget()
+
     post_url = "https://www.virustotal.com/api/v3/files"
 
     files = { "file": ("file", open(file_path, "rb")) }
@@ -67,8 +94,14 @@ def check_for_virus(file_path):
     for stat in filtered_stats:
         count_bad += filtered_stats[stat]
     if(filtered_stats[stat] > 0):
+        new_file = Label(window, text = 'new file has been added it contain malicious content')
+        new_file.pack()
+        window.after(5000, lambda: new_file.pack_forget())
         print(f"this file contain malicious content {count_bad}")
     else:
+        new_file = Label(window, text = 'new file has been added it does not contain any malicious content')
+        new_file.pack()
+        window.after(5000, lambda: new_file.pack_forget())
         print("this file has no viruses")
 
 
@@ -76,47 +109,29 @@ def check_for_virus(file_path):
 
 #check_for_virus("C:/Users/user1/Desktop/corcu/New Text Document (4).txt")
 
-
-
-def main(name:str, run:bool, watchdir:dir= path):
-        
-
+def main(name: str, run: bool, watchdir: str):
     print("PROGRAM IS LIVE")
-    print(f"program: {name}")
+    print(f"Program: {name}")
     first_run = True
+    current_data = get_last_modified_list(watchdir)
 
-    current_data = str(get_last_modified_list(watchdir)) # takes current file data(filePaths)
-    while run:
-        new_data = get_last_modified_list(watchdir) # getting new data
+    def check_files():
+        nonlocal first_run, current_data
+        new_data = get_last_modified_list(watchdir)
         if first_run:
             current_data = new_data
             first_run = False
-        if new_data != current_data and not first_run : # אם המידע השתנה אז צריך להחליף את המידע הישן בחדש
-            added_file = list(set(new_data) - set(current_data)) # בודק מה הקובץ החדש
+        if new_data != current_data:
+            added_file = list(set(new_data) - set(current_data))
             current_data = new_data
-            print(f"File Changed/added {added_file[0]}") 
+            print(f"File Changed/added {added_file[0]}")
             check_for_virus(added_file[0])
-        time.sleep(0.05) 
+        if run:
+            window.after(50, check_files)  # Schedule next check
 
-#main("Anti Virus")
+    check_files()
 
-window = Tk()
-window.minsize(400,400)
-
-search_text = Label(window, text = 'check a file')
-search_text.pack()
-
-entry = Entry()
-entry.config(font=('Ink Free', 10))
-entry.pack()
-
-def submit():
-    search = entry.get() # get the value of what you wrote
-    main("ANTI VIRUS", True)
-
-button = Button(window, text="search for viruses", width=25, command= submit)
-button.place(x=100, y=300)
-
+#main("Anti Virus", True)
 
 mainloop()
 
