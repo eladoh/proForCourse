@@ -105,7 +105,6 @@ def check_for_virus(file_path):
 
     response = requests.post(post_url, files=files, headers=headers)
     response_data = response.json()
-
     response_id = response_data["data"]["id"]
 
     print(response_id)
@@ -162,8 +161,12 @@ def main(name: str, run: bool,frequency:int, watchdir: str): #frequency: str
         if new_data != current_data:
             added_file = list(set(new_data) - set(current_data))
             current_data = new_data
-            print(f"File Changed/added {added_file[0]}")
-            check_for_virus(added_file[0])
+            try:
+                check_for_virus(added_file[0])
+            except IndexError:
+                pass # ignores index erorrs
+
+
         if run:
             window.after(int(frequency) * 1000 , check_files)  # Schedule next check # add frequency
     check_files()
