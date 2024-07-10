@@ -1,6 +1,7 @@
 import socket
 import os
 import threading
+import pickle
 
 
 def handle_client(conn, addr, upload_or_download):
@@ -29,12 +30,32 @@ def handle_client(conn, addr, upload_or_download):
         conn.close()
         #sock.close()
         print(f'File saved to {file_path}')
-        if upload_or_download == "download":
-            path = r"C:\Users\user1\Desktop\proForCourse\files"
-            obj = os.scandir(path)
-            print(obj)
-            # list_of_files = []
-            # pick_file = str(input(f"which file do you want to download? {list_of_files}"))
+    if upload_or_download == "download":
+
+        destination_path_ = conn.recv(1024).decode('utf-8')
+
+        file_location_path = r"C:\Users\user1\Desktop\proForCourse\files"
+        list_of_files = []
+        dir = os.scandir(file_location_path)
+
+       # print("\nthose are the files:")
+        for file in dir:
+            if file.is_file():
+                list_of_files.append(file.name)
+            #print(file.name)
+
+        serialized_data = pickle.dumps(list_of_files)
+        conn.sendall(serialized_data)
+
+
+        #picked_file = str(input(f"which file do you want to download?"))
+
+       # file_size = os.path.getsize(picked_file)
+        #print(file_size)
+
+        
+       # conn.send(picked_file.encode())
+        
 
 
 
@@ -55,10 +76,10 @@ def main():
 
         upload_or_download = conn.recv(1024).decode()
 
-        if(upload_or_download == "upload"):
-            print("upload")
-        if upload_or_download == "download":
-            print("download")
+        # if(upload_or_download == "upload"):
+        #     print("upload")
+        # if upload_or_download == "download":
+        #     print("download")
 
         client_thread = threading.Thread(target=handle_client, args=(conn, addr, upload_or_download))
         client_thread.start()

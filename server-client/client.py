@@ -1,4 +1,6 @@
 import socket
+import pickle
+
 
 client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -40,4 +42,17 @@ if upload_or_download == "upload":
 
     client_sock.close()
 if upload_or_download == "download":
-    pass
+    destination_path = str(input("where do you want to store your file?"))
+
+    client_sock.sendall(destination_path.encode('utf-8'))
+
+    print("\nthose are the files:")
+    received_data = b''
+    while True:
+        chunk = client_sock.recv(4096)
+        if not chunk:
+            break
+        received_data += chunk
+    deserialized_data = pickle.loads(received_data)
+    print(deserialized_data)
+
