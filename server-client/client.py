@@ -10,9 +10,9 @@ print(f'Connected to server at {server_address}')
 
 filename = input("Enter the file path of your file: ")
 
-#upload_or_download = str(input("do you want to upload or download the file? "))
+upload_or_download = str(input("do you want to upload or download the file? "))
 
-#client_sock.sendall(upload_or_download.encode('utf-8'))
+client_sock.sendall(upload_or_download.encode('utf-8'))
 
 with open(filename, "rb") as fi:
     data = fi.read()

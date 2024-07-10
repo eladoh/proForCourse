@@ -114,7 +114,7 @@ def check_for_virus(file_path):
     end_response = requests.get(get_url, headers=headers)
 
     end_responsejson = end_response.json()
-
+    print(end_response)
     stats = end_responsejson["data"]["attributes"]["stats"]
 #    print(end_response.text)
     print(stats)
