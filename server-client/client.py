@@ -14,27 +14,30 @@ upload_or_download = str(input("do you want to upload or download the file? "))
 
 client_sock.sendall(upload_or_download.encode('utf-8'))
 
-with open(filename, "rb") as fi:
-    data = fi.read()
-    if not data:
-        print('File is empty')
-        client_sock.close()
-        exit(1)
+if upload_or_download == "upload":
+    with open(filename, "rb") as fi:
+        data = fi.read()
+        if not data:
+            print('File is empty')
+            client_sock.close()
+            exit(1)
 
-    # Send the length of the filename
-    client_sock.send(str(len(filename)).zfill(8).encode())
-    # Send the filename
-    client_sock.send(filename.encode())
+        # Send the length of the filename
+        client_sock.send(str(len(filename)).zfill(8).encode())
+        # Send the filename
+        client_sock.send(filename.encode())
 
-    # Send the length of the data
-    client_sock.send(str(len(data)).zfill(16).encode())
+        # Send the length of the data
+        client_sock.send(str(len(data)).zfill(16).encode())
 
-    # Send the file data in chunks
-    total_sent = 0
-    while total_sent < len(data):
-        sent = client_sock.send(data[total_sent:])
-        if sent == 0:
-            raise RuntimeError("Socket connection broken")
-        total_sent += sent
+        # Send the file data in chunks
+        total_sent = 0
+        while total_sent < len(data):
+            sent = client_sock.send(data[total_sent:])
+            if sent == 0:
+                raise RuntimeError("Socket connection broken")
+            total_sent += sent
 
-client_sock.close()
+    client_sock.close()
+if upload_or_download == "download":
+    pass
