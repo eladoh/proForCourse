@@ -32,7 +32,7 @@ def handle_client(conn, addr, upload_or_download):
         print(f'File saved to {file_path}')
     if upload_or_download == "download":
 
-        destination_path_ = conn.recv(1024).decode('utf-8')
+        #destination_path_ = conn.recv(1024).decode('utf-8')
 
         file_location_path = r"C:\Users\user1\Desktop\proForCourse\files"
         list_of_files = []
@@ -43,9 +43,42 @@ def handle_client(conn, addr, upload_or_download):
             if file.is_file():
                 list_of_files.append(file.name)
             #print(file.name)
+        
+        list_of_files = str(list_of_files)
+        print(list_of_files)
+        list_of_files = list_of_files.encode()
 
-        serialized_data = pickle.dumps(list_of_files)
-        conn.sendall(serialized_data)
+        conn.send(list_of_files)
+
+        picked_file_path = conn.recv(1024).decode() #fr"{file_location_path}\{ conn.recv(1024).decode()}"
+        print("picked file path: ", picked_file_path)
+       # print(str(len(picked_file_path)))
+
+        #picked_file_data_len = os.path.getsize(picked_file_path)
+
+    with open(picked_file_path, "rb") as fi:
+        data = fi.read()
+        if not data:
+            print('File is empty')
+          #  client_sock.close()
+            exit(1)
+
+        # Send the length of the filename
+        conn.send(str(len(picked_file_path)).zfill(8).encode())
+        # Send the filename
+        conn.send(picked_file_path.encode())
+
+        # Send the length of the data
+        conn.send(str(len(data)).zfill(16).encode())
+
+        # Send the file data in chunks
+        total_sent = 0
+        while total_sent < len(data):
+            sent = conn.send(data[total_sent:])
+            if sent == 0:
+                raise RuntimeError("Socket connection failed")
+            total_sent += sent
+            print(total_sent)
 
 
         #picked_file = str(input(f"which file do you want to download?"))
@@ -62,7 +95,7 @@ def handle_client(conn, addr, upload_or_download):
 
 def main():
 
-    host = '127.0.0.1'
+    host = '10.100.102.11'
     port = 8080
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
