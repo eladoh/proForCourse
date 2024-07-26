@@ -1,1 +1,0 @@
-C:/Users/user1/Desktop/corcu
