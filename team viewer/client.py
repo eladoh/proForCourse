@@ -9,6 +9,8 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 import sys
 import keyboard
+from pynput.mouse import Button, Controller
+
 
 class RemoteControlClient(QMainWindow):
     def __init__(self, host='localhost', port=8080):
@@ -27,8 +29,8 @@ class RemoteControlClient(QMainWindow):
         self.last_y = -1
         
         self.move_count = 0
-        self.limit = 15
-        
+        self.limit = 20
+
         self.current_width = 800
         self.current_height = 600  
 
@@ -38,6 +40,10 @@ class RemoteControlClient(QMainWindow):
         self.client_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         self.client_socket.connect((host, port))
 
+        self.width_res = int.from_bytes(self.client_socket.recv(4))
+        self.height_res = int.from_bytes(self.client_socket.recv(4))
+        print(f"width: {self.width_res}, height: {self.height_res} ")
+        
 
 
         # Start screen receiving in a separate thread
@@ -80,8 +86,8 @@ class RemoteControlClient(QMainWindow):
         # y = self.mapFromGlobal(QCursor.pos()).y()
         x = event.x() / self.current_width
         y = event.y() / self.current_height
-        x = int(x * 1000) + 100
-        y = int(y * 1000) + 50
+        x = int(x * self.width_res) 
+        y = int(y * self.height_res)   
         #text = f"Mouse coordinates: ( {x} : {y} )"
         
         if ((x != self.last_x or y != self.last_y) and (self.move_count >= self.limit)):
@@ -97,15 +103,15 @@ class RemoteControlClient(QMainWindow):
         else:
             self.move_count += 1
             
-        # cords_thread = 
+        #cords_thread = 
    
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.pressPos = event.pos()
             x = event.x()
             y = event.y() 
-            x = int(x / self.current_width * 1000) + 280
-            y = int(y / self.current_height * 1000) 
+            x = int(x / self.current_width *  self.width_res) 
+            y = int(y / self.current_height * self.height_res) 
             print(f"x: {x}, y: {y}")
             #self.send_coordinates(x, y)
             message_type = 1
@@ -162,7 +168,7 @@ class RemoteControlClient(QMainWindow):
         except Exception as e:
             print(f"failed to send socket {e}")
             
-
+    
     # def send_coordinates(self, x, y):
     #     try:
     #         x_bytes = x.to_bytes(4, byteorder='big')
