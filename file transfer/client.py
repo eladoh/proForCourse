@@ -4,7 +4,7 @@ import os
 
 client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-server_address = ('10.100.102.11', 8080)
+server_address = ('localhost', 8080)
 
 client_sock.connect(server_address)
 

@@ -29,7 +29,7 @@ class RemoteControlClient(QMainWindow):
         self.last_y = -1
         
         self.move_count = 0
-        self.limit = 20
+        self.limit = 20 # adjust for connection speed
 
         self.current_width = 800
         self.current_height = 600  

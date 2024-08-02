@@ -95,7 +95,7 @@ def handle_client(conn, addr, upload_or_download):
 
 def main():
 
-    host = '10.100.102.11'
+    host = 'localhost'
     port = 8080
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
