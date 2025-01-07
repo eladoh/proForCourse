@@ -10,7 +10,7 @@ client_sock.connect(server_address)
 
 print(f'Connected to server at {server_address}')
 
-upload_or_download = str(input("do you want to upload or download the file? "))
+upload_or_download = str(input("do you want to upload or download the file?"))
 
 #filename = input("Enter the file path of your file: ")
 

@@ -21,7 +21,7 @@ class RemoteControlClient(QMainWindow):
         self.label = QLabel(self)
         self.label.setGeometry(0, 0, 800, 600)
         self.pixmap = QPixmap()
-        self.label.setMouseTracking(True)
+        self.label.setMouseTracking(True) 
         self.setMouseTracking(True)
 
         self.min_interval = 0.01 
@@ -37,7 +37,7 @@ class RemoteControlClient(QMainWindow):
         self.hotkey_state = False
 
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        self.client_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1) # כל חבילה קטנה מאוגדת לחבילה גדולה יותר שעושים tcpno delay זה עוצר את זה וגורם לשליחה מיידית מעלה מהירות 
         self.client_socket.connect((host, port))
 
         self.width_res = int.from_bytes(self.client_socket.recv(4))
@@ -45,7 +45,7 @@ class RemoteControlClient(QMainWindow):
         print(f"width: {self.width_res}, height: {self.height_res} ")
         
 
-
+        
         # Start screen receiving in a separate thread
         self.receive_thread = threading.Thread(target=self.receive_screen, daemon=True)
         self.receive_thread.start()
@@ -59,10 +59,11 @@ class RemoteControlClient(QMainWindow):
         keyboard.wait("esc")  # Keep the thread running until 'esc' is pressed
 
     def receive_screen(self):
+        # אפשר להוסיף counter שסופר כל כמה פעמים לקבל תמונה בשביל לתקן בעיות רשת fps
         while True:
             try:
-                data_size = int.from_bytes(self.client_socket.recv(4), byteorder='big')
-                screen_data = b''
+                data_size = int.from_bytes(self.client_socket.recv(4), byteorder='big') # מקבל כמספר את גודל הדאטה
+                screen_data = b'' # מקבלת את המידע בצורה מדוייקת יותר
                 while len(screen_data) < data_size:
                     packet = self.client_socket.recv(data_size - len(screen_data))
                     if not packet:
@@ -77,10 +78,12 @@ class RemoteControlClient(QMainWindow):
                 print(f"Connection failed: {e}")
                 break
 
+    # בודק מתי יש resize של המסך בשביל שנוכל להתאים את הרזולוטציות
     def resizeEvent(self, event):
         self.current_width = self.width()
         self.current_height = self.height()
         super().resizeEvent(event)
+        
     def mouseMoveEvent(self, event): # event
         # x = self.mapFromGlobal(QCursor.pos()).x()
         # y = self.mapFromGlobal(QCursor.pos()).y()
@@ -90,7 +93,7 @@ class RemoteControlClient(QMainWindow):
         y = int(y * self.height_res)   
         #text = f"Mouse coordinates: ( {x} : {y} )"
         
-        if ((x != self.last_x or y != self.last_y) and (self.move_count >= self.limit)):
+        if ((x != self.last_x or y != self.last_y) and (self.move_count >= self.limit)): # גם בודק שאנחנו לא באותו הקורדינטות וגם בודק שאנחנשולחים כל זמן מסוים
             self.last_x = x
             self.last_y = y
             x_bytes = x.to_bytes(4, byteorder="big")

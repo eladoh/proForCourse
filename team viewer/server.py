@@ -36,7 +36,6 @@ def send(server_sock):
 def receive_input(server_sock):
     while True:
         try:
-
             message_type = int.from_bytes(server_sock.recv(1), byteorder="big") # 1 = mouse, 2 = keyboard
             data_len = int.from_bytes(server_sock.recv(4), byteorder="big")
             data = server_sock.recv(data_len)
